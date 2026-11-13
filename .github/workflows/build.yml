@@ -17,27 +17,19 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.22.0'
           channel: 'stable'
-      - name: Setup Android, Icon, Splash & Permissions
+      - name: Setup Android & Permissions
         run: |
           rm -rf android
           flutter create . --platforms=android --project-name alili_omni --org com.alili --template=app
-          
-          # 1. إنشاء مجلد الأيقونة وتنزيل أيقونة احترافية تلقائياً
-          mkdir -p assets/icon
-          curl -L -o assets/icon/app_icon.png "https://img.icons8.com/fluency/512/artificial-intelligence.png"
-          
-          # 2. إضافة الصلاحيات وتغيير الاسم
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.RECORD_AUDIO"\/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
           sed -i 's/android:label="alili_omni"/android:label="Alili Omni"/' android/app/src/main/AndroidManifest.xml
           
-          # 3. تثبيت الحزم وبناء الأيقونات
           flutter pub get
           flutter clean
           dart run flutter_launcher_icons
           dart run flutter_native_splash:create
-          
       - name: Build APK
         run: flutter build apk --release
       - name: Release
