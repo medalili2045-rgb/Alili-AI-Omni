@@ -23,40 +23,13 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Print Debug Info
+      - name: Setup Android
         run: |
-          echo "Java Version:"
-          java -version
-          echo "Flutter Version:"
-          flutter --version
-
-      - name: Recreate Android (if missing) & Apply Permissions
-        run: |
-          if [ ! -d "android" ]; then
-            flutter create . --platforms=android --project-name alili_omni --org com.alili --template=app
-          fi
-
+          flutter create . --platforms=android --project-name alili_omni --org com.alili
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          sed -i '/<manifest /a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.RECORD_AUDIO"\/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"\/>' "$MANIFEST" || true
+          sed -i '/<manifest /a \    <uses-permission android:name="android.permission.INTERNET"\/>' "$MANIFEST" || true
           sed -i 's/android:label="alili_omni"/android:label="Alili Omni"/' "$MANIFEST" || true
-
-          if [ -f "android/build.gradle" ]; then
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "2.0.10"/' android/build.gradle || true
-            sed -i 's/classpath .*com.android.tools.build:gradle.*/classpath "com.android.tools.build:gradle:8.5.0"/' android/build.gradle || true
-          fi
-          if [ -f "android/gradle/wrapper/gradle-wrapper.properties" ]; then
-            sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-bin.zip|' android/gradle/wrapper/gradle-wrapper.properties || true
-          fi
-
-      - name: Clean Gradle Cache
-        run: |
-          rm -rf ~/.gradle/caches/
-          flutter clean
-
-      - name: Get Dependencies
-        run: |
           flutter pub get
-          flutter pub get # إعادة الجلب بعد clean
 
       - name: Build APK
         run: flutter build apk --release
